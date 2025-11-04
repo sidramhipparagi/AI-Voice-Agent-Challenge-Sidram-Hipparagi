@@ -1,12 +1,13 @@
 import os
 import speech_recognition as sr
 from gtts import gTTS
-from playsound import playsound
+import pygame
 import requests
 import json
 from datetime import datetime
 import tempfile
 import random
+import time
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -135,6 +136,7 @@ class RiverwoodVoiceAgent:
     
     def speak(self, text):
         """Convert text to speech and play it"""
+        temp_file = None
         try:
             # Detect language for TTS
             tts_lang = "hi" if self.language == "hi" or any(ord(char) > 127 for char in text) else "en"
@@ -147,14 +149,33 @@ class RiverwoodVoiceAgent:
             tts = gTTS(text=text, lang=tts_lang, slow=False)
             tts.save(temp_file)
             
-            # Play audio
-            playsound(temp_file)
+            # Initialize pygame mixer if not already initialized
+            if not pygame.mixer.get_init():
+                pygame.mixer.init()
             
-            # Clean up
-            os.remove(temp_file)
+            # Play audio using pygame
+            pygame.mixer.music.load(temp_file)
+            pygame.mixer.music.play()
+            
+            # Wait for audio to finish playing
+            while pygame.mixer.music.get_busy():
+                time.sleep(0.1)
+            
+            # Small delay to ensure file is released
+            time.sleep(0.2)
             
         except Exception as e:
             print(f"TTS Error: {e}")
+        
+        finally:
+            # Clean up temp file
+            if temp_file and os.path.exists(temp_file):
+                try:
+                    pygame.mixer.music.unload()
+                    time.sleep(0.1)
+                    os.remove(temp_file)
+                except Exception:
+                    pass  # Ignore cleanup errors
     
     def get_llm_response(self, user_input):
         """Get response from LLM via OpenRouter"""

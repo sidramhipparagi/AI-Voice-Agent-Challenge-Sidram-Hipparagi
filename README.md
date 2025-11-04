@@ -66,6 +66,7 @@ Agent: Aaj hamari site pe 3rd floor ka kaam chal raha hai...
 - Speech Recognition (Google)
 - LLM via OpenRouter (Llama 3.3 8B - free)
 - Text-to-Speech (Google TTS)
+- Audio Playback (Pygame - reliable on Windows)
 - Python 3.8+
 
 ## Notes
